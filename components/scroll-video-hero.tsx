@@ -108,6 +108,8 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
   const [loadedCount, setLoadedCount] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [loadingVisible, setLoadingVisible] = useState(true);
+  const [loadingMounted, setLoadingMounted] = useState(true);
   const [, forceUpdate] = useState({});
 
   // Preload all images
@@ -127,6 +129,18 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
       images.current[i - 1] = img;
     }
   }, []);
+
+  // Handle loading screen dismissal
+  useEffect(() => {
+    if (isReady) {
+      setTimeout(() => {
+        setLoadingVisible(false);
+      }, 400);
+      setTimeout(() => {
+        setLoadingMounted(false);
+      }, 1000);
+    }
+  }, [isReady]);
 
   // Draw frame function
   const drawFrame = (index: number) => {
@@ -235,28 +249,205 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
         />
 
         {/* Loading Screen */}
-        {!isReady && (
+        {loadingMounted && (
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundColor: '#0a0a0a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
+              zIndex: 20,
+              overflow: 'hidden',
+              opacity: loadingVisible ? 1 : 0,
+              pointerEvents: loadingVisible ? 'auto' : 'none',
+              transition: 'opacity 0.6s ease',
             }}
           >
+            <style>{`
+              @keyframes fadeInLogo {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0px); }
+              }
+
+              @keyframes loadingFill {
+                from { width: 0%; background-position: 0%; }
+                to { width: 100%; background-position: 200%; }
+              }
+
+              @keyframes breathe {
+                0%, 100% { opacity: 0.4; }
+                50% { opacity: 1; }
+              }
+
+              @keyframes float {
+                0%, 100% { transform: translateY(0px); opacity: 0.3; }
+                50% { transform: translateY(-20px); opacity: 0.7; }
+              }
+            `}</style>
+
+            {/* Blurred first frame background */}
+            <img
+              src="/frames/ezgif-frame-001.jpg"
+              alt=""
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                filter: 'blur(20px)',
+                transform: 'scale(1.1)',
+              }}
+            />
+
+            {/* Dark overlay */}
             <div
               style={{
-                color: 'white',
-                fontSize: '14px',
-                letterSpacing: '0.1em',
-                textAlign: 'center',
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(0,0,0,0.45)',
+              }}
+            />
+
+            {/* Floating particles */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '35%',
+                left: '20%',
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.3)',
+                animation: 'float 3s ease-in-out infinite',
+                animationDelay: '0s',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                top: '60%',
+                left: '15%',
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.3)',
+                animation: 'float 2.5s ease-in-out infinite',
+                animationDelay: '0.5s',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                top: '40%',
+                left: '80%',
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.3)',
+                animation: 'float 3.5s ease-in-out infinite',
+                animationDelay: '1s',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                top: '65%',
+                left: '85%',
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.3)',
+                animation: 'float 2.8s ease-in-out infinite',
+                animationDelay: '1.5s',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                top: '25%',
+                left: '50%',
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.3)',
+                animation: 'float 4s ease-in-out infinite',
+                animationDelay: '0.3s',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                top: '70%',
+                left: '45%',
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.3)',
+                animation: 'float 3.2s ease-in-out infinite',
+                animationDelay: '2s',
+              }}
+            />
+
+            {/* Centered content */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '32px',
               }}
             >
-              <div style={{ color: '#2D7A3A', marginBottom: '8px', fontSize: '16px' }}>●</div>
-              Loading... {Math.round((loadedCount / FRAME_COUNT) * 100)}%
+              {/* Cow Image */}
+              <img
+                src="/cow.png"
+                alt="Cow"
+                style={{
+                  height: '56px',
+                  objectFit: 'contain',
+                  animation: 'fadeInLogo 0.8s ease',
+                }}
+              />
+
+              {/* Loading bar */}
+              <div
+                style={{
+                  width: '200px',
+                  height: '3px',
+                  borderRadius: '999px',
+                  background: 'rgba(255,255,255,0.15)',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    height: '100%',
+                    background: 'linear-gradient(to right, #2D7A3A, #4ade80, #2D7A3A)',
+                    backgroundSize: '200%',
+                    animation: 'loadingFill 2.5s ease-in-out forwards',
+                  }}
+                />
+              </div>
+
+              {/* Loading text */}
+              <div
+                style={{
+                  fontFamily: '\'Space Grotesk\', sans-serif',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.6)',
+                  animation: 'breathe 1.5s ease-in-out infinite',
+                }}
+              >
+                Loading your flavour experience...
+              </div>
             </div>
           </div>
         )}
