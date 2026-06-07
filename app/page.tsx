@@ -22,8 +22,8 @@ export default function Home() {
         style={{
           position: 'relative',
           zIndex: 10,
-          marginTop: '-100vh',
-          paddingTop: '100vh',
+          marginTop: '-60vh',
+          paddingTop: '60vh',
           background: '#ffffff',
           borderRadius: '24px 24px 0 0',
           boxShadow: '0 -40px 80px rgba(0,0,0,0.4)',

@@ -14,16 +14,16 @@ function getNavStyle(progress: number): { background: string; borderColor: strin
       borderColor: 'rgba(255,255,255,0.2)',
     };
   } else if (progress >= 0.33 && progress < 0.66) {
-    // Mango section
+    // Mango/strawberry section
     return {
       background: 'rgba(255,140,0,0.25)',
       borderColor: 'rgba(255,140,0,0.3)',
     };
   } else {
-    // Strawberry and banana section
+    // Banana section
     return {
-      background: 'rgba(255,60,80,0.25)',
-      borderColor: 'rgba(255,60,80,0.3)',
+      background: 'rgba(255,220,50,0.25)',
+      borderColor: 'rgba(255,220,50,0.3)',
     };
   }
 }

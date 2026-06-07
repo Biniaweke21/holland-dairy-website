@@ -3,19 +3,21 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface TextBlock {
-  actIndex: number;
+  start: number;
+  end: number;
   side: 'left' | 'right';
   label: string;
-  headingLine1: string;
-  headingLine2: string;
+  line1: string;
+  line2: string;
   subtext: string;
+  extra: string;
 }
 
 interface ScrollVideoHeroProps {
   onScrollProgress?: (progress: number) => void;
 }
 
-const FRAME_COUNT = 228;
+const FRAME_COUNT = 152;
 const TOTAL_ZONES = 3;
 
 const ACTS = [
@@ -27,108 +29,75 @@ const ACTS = [
 
 const TEXT_BLOCKS: TextBlock[] = [
   {
-    actIndex: 0,
+    start: 0.015,
+    end: 0.235,
     side: 'left',
     label: 'EST. IN ETHIOPIA',
-    headingLine1: 'Local Milk.',
-    headingLine2: 'Premium Quality.',
+    line1: 'Local Milk.',
+    line2: 'Premium Quality.',
     subtext: 'Building a brighter tomorrow through dairy products.',
+    extra: 'Proudly made for Ethiopian families.'
   },
   {
-    actIndex: 1,
+    start: 0.265,
+    end: 0.485,
     side: 'right',
     label: 'MANGO FLAVOUR',
-    headingLine1: 'Bursting with',
-    headingLine2: 'real flavour.',
+    line1: 'Bursting with',
+    line2: 'real flavour.',
     subtext: 'Fresh mango. Real fruit. Pure joy in every sip.',
+    extra: 'Every sip bursts with real fruit.'
   },
   {
-    actIndex: 2,
+    start: 0.515,
+    end: 0.735,
     side: 'left',
-    label: 'STRAWBERRY & BANANA',
-    headingLine1: 'Sweet meets',
-    headingLine2: 'creamy.',
-    subtext: 'Strawberry, Banana. The flavours your day has been waiting for.',
+    label: 'STRAWBERRY FLAVOUR',
+    line1: 'Sweet meets',
+    line2: 'creamy.',
+    subtext: 'The flavour your day has been waiting for.',
+    extra: 'Find your favourite flavour today.'
   },
+  {
+    start: 0.765,
+    end: 0.985,
+    side: 'right',
+    label: 'BANANA FLAVOUR',
+    line1: 'Energy that',
+    line2: 'keeps going.',
+    subtext: 'Pure banana. Pure power. Pure Holland Dairy.',
+    extra: 'Feel the energy in every spoonful.'
+  }
 ];
 
-// Center frames for each block
-const BLOCK_CENTER_FRAMES = [1, 68, 148, 210];
-const TRAVEL_WINDOW = 0.09;
-
-function getBlockTiming(centerFrame: number) {
-  const centerProgress = centerFrame / 228;
-  const start = Math.max(0, centerProgress - TRAVEL_WINDOW);
-  const end = Math.min(1, centerProgress + TRAVEL_WINDOW);
-  return { start, end, centerProgress };
-}
-
 function getFrameIndex(progress: number): number {
-  let frameIndex: number;
-
-  if (progress >= 0 && progress < 0.33) {
-    // Zone 1: frames 1 to 78
-    const localProgress = progress / 0.33;
-    frameIndex = 1 + Math.floor(localProgress * 77);
-  } else if (progress >= 0.33 && progress < 0.66) {
-    // Zone 2: frames 79 to 168
-    const localProgress = (progress - 0.33) / 0.33;
-    frameIndex = 79 + Math.floor(localProgress * 89);
-  } else {
-    // Zone 3: frames 169 to 228
-    const localProgress = (progress - 0.66) / 0.34;
-    frameIndex = 169 + Math.floor(localProgress * 59);
-  }
-
-  // Clamp between 1 and 228
-  return Math.max(1, Math.min(FRAME_COUNT, frameIndex));
+  return Math.min(151, Math.floor(progress * 152));
 }
 
 function getFramePath(index: number): string {
   return `/frames/ezgif-frame-${String(index).padStart(3, '0')}.jpg`;
 }
 
-function getTextBlockStyle(block: TextBlock, wrapperElement: HTMLDivElement | null): { opacity: number; translateY: string } {
-  if (!wrapperElement) return { opacity: 0, translateY: '100vh' };
-
-  const scrollY = window.scrollY;
-  const wrapperTop = wrapperElement.getBoundingClientRect().top + scrollY;
-  const wrapperHeight = wrapperElement.offsetHeight;
-  const vh = window.innerHeight;
-
-  // Calculate overall progress
-  const scrollProgress = Math.max(0, Math.min(1, (scrollY - wrapperTop) / (wrapperHeight - vh)));
-
-  // Get timing for this block
-  const centerFrame = BLOCK_CENTER_FRAMES[block.actIndex];
-  const timing = getBlockTiming(centerFrame);
-
-  let opacity = 0;
-  let translateY = '100vh';
-
-  if (scrollProgress < timing.start || scrollProgress > timing.end) {
-    // Outside block window
-    opacity = 0;
-    translateY = scrollProgress < timing.start ? '100vh' : '-100vh';
-  } else {
-    // Within block window
-    opacity = 1;
-    let travelProgress = (scrollProgress - timing.start) / (timing.end - timing.start);
-    travelProgress = Math.max(0, Math.min(1, travelProgress));
-
-    // Special case for block 1 - ensure it's centered on load
-    if (timing.centerProgress < 0.05 && scrollProgress === 0) {
-      travelProgress = Math.max(0.5, travelProgress);
-    }
-
-    const translateYvh = (0.5 - travelProgress) * 200;
-    translateY = `${translateYvh}vh`;
+function getTextStyle(block: TextBlock, scrollProgress: number): { opacity: number; translateYvh: number } {
+  if (scrollProgress < block.start || scrollProgress > block.end) {
+    return { opacity: 0, translateYvh: 100 };
   }
 
-  return {
-    opacity,
-    translateY,
-  };
+  const travelProgress = (scrollProgress - block.start) / (block.end - block.start);
+
+  let translateYvh = 0;
+
+  if (travelProgress < 0.2) {
+    const enterProgress = travelProgress / 0.2;
+    translateYvh = 100 - (enterProgress * 100);
+  } else if (travelProgress <= 0.8) {
+    translateYvh = 0;
+  } else {
+    const exitProgress = (travelProgress - 0.8) / 0.2;
+    translateYvh = -(exitProgress * 100);
+  }
+
+  return { opacity: 1, translateYvh };
 }
 
 export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroProps) {
@@ -138,6 +107,7 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
   const lastDrawnFrame = useRef<number>(-1);
   const [loadedCount, setLoadedCount] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [, forceUpdate] = useState({});
 
   // Preload all images
@@ -196,6 +166,8 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
     // Overall progress for navbar
     const overallProgress = Math.max(0, Math.min(1, (scrollY - wrapperTop) / (wrapperHeight - vh)));
     
+    setScrollProgress(overallProgress);
+    
     if (onScrollProgress) {
       onScrollProgress(overallProgress);
     }
@@ -237,7 +209,7 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
       ref={wrapperRef} 
       style={{ 
         position: 'relative', 
-        height: '800vh',
+        height: '950vh',
         zIndex: 1,
       }}
     >
@@ -302,16 +274,9 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
 
         {/* Text Blocks */}
         {TEXT_BLOCKS.map((block, index) => {
-          const style = getTextBlockStyle(block, wrapperRef.current);
+          const { opacity, translateYvh } = getTextStyle(block, scrollProgress);
           const isLeft = block.side === 'left';
-          const isActOne = block.actIndex === 0;
-
-          // Extra line for each block
-          const extraLines = [
-            'Proudly made for Ethiopian families.',
-            'Every sip bursts with real fruit.',
-            'Find your favourite flavour today.',
-          ];
+          const isActOne = index === 0;
 
           return (
             <div
@@ -325,13 +290,13 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 alignItems: 'center',
                 pointerEvents: 'none',
                 zIndex: 2,
-                opacity: style.opacity,
+                opacity: opacity,
               }}
             >
               <div
                 style={{
                   maxWidth: '360px',
-                  transform: `translateY(${style.translateY})`,
+                  transform: `translateY(${translateYvh}vh)`,
                 }}
               >
                 {/* Label */}
@@ -362,8 +327,8 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                     textShadow: '0 2px 20px rgba(0,0,0,0.4)',
                   }}
                 >
-                  <span style={{ display: 'block' }}>{block.headingLine1}</span>
-                  <span style={{ display: 'block' }}>{block.headingLine2}</span>
+                  <span style={{ display: 'block' }}>{block.line1}</span>
+                  <span style={{ display: 'block' }}>{block.line2}</span>
                 </h2>
 
                 {/* Subtext */}
@@ -392,7 +357,7 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                     marginTop: '8px',
                   }}
                 >
-                  {extraLines[block.actIndex]}
+                  {block.extra}
                 </p>
               </div>
             </div>
