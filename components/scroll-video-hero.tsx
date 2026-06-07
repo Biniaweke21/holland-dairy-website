@@ -32,41 +32,41 @@ const TEXT_BLOCKS: TextBlock[] = [
     start: 0.015,
     end: 0.235,
     side: 'left',
-    label: 'EST. IN ETHIOPIA',
-    line1: 'Local Milk.',
-    line2: 'Premium Quality.',
-    subtext: 'Building a brighter tomorrow through dairy products.',
-    extra: 'Proudly made for Ethiopian families.'
+    label: 'WELCOME TO THE FLAVOURVERSE',
+    line1: 'One Bottle.',
+    line2: 'Four Worlds.',
+    subtext: 'Crafted from Ethiopian milk and transformed through Dutch dairy expertise.',
+    extra: 'Scroll to discover what\'s inside.'
   },
   {
     start: 0.265,
     end: 0.485,
     side: 'right',
-    label: 'MANGO FLAVOUR',
-    line1: 'Bursting with',
-    line2: 'real flavour.',
-    subtext: 'Fresh mango. Real fruit. Pure joy in every sip.',
-    extra: 'Every sip bursts with real fruit.'
+    label: 'WORLD 01 • MANGO',
+    line1: 'Step Into The',
+    line2: 'Golden Hour.',
+    subtext: 'A world of vibrant colour, juicy flavour, and endless summer energy.',
+    extra: 'The brighter side of refreshment.'
   },
   {
     start: 0.515,
     end: 0.735,
     side: 'left',
-    label: 'STRAWBERRY FLAVOUR',
-    line1: 'Sweet meets',
-    line2: 'creamy.',
-    subtext: 'The flavour your day has been waiting for.',
-    extra: 'Find your favourite flavour today.'
+    label: 'WORLD 02 • STRAWBERRY',
+    line1: 'Where Sweetness',
+    line2: 'Takes Flight.',
+    subtext: 'Bold berry notes swirl through a dreamlike landscape of colour and cream.',
+    extra: 'A little joy in every moment.'
   },
   {
     start: 0.765,
     end: 0.985,
     side: 'right',
-    label: 'BANANA FLAVOUR',
-    line1: 'Energy that',
-    line2: 'keeps going.',
-    subtext: 'Pure banana. Pure power. Pure Holland Dairy.',
-    extra: 'Feel the energy in every spoonful.'
+    label: 'WORLD 03 • BANANA',
+    line1: 'Smooth Never',
+    line2: 'Stands Still.',
+    subtext: 'Rich banana flavour flows with effortless energy and satisfying comfort.',
+    extra: 'Made to move with you.'
   }
 ];
 
@@ -272,6 +272,57 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
           }}
         />
 
+        {/* Scroll Progress Indicator */}
+        {/* Vertical line connecting the circles */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '29px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '1.5px',
+            height: '104px',
+            background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent)',
+            zIndex: 9,
+            pointerEvents: 'none',
+          }}
+        />
+        {/* Circle indicators */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '24px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            pointerEvents: 'none',
+          }}
+        >
+          {[0, 1, 2, 3].map((i) => {
+            const activeIndex = Math.min(3, Math.floor(scrollProgress * 4));
+            return (
+              <div
+                key={i}
+                style={{
+                  width: '11px',
+                  height: '11px',
+                  borderRadius: '50%',
+                  transition: 'all 0.4s ease',
+                  background: activeIndex === i ? '#ffffff' : 'transparent',
+                  border: activeIndex === i ? 'none' : '1.5px solid rgba(255,255,255,0.55)',
+                  boxShadow: activeIndex === i ? '0 0 6px 2px rgba(255,255,255,0.95), 0 0 20px 6px rgba(255,255,255,0.5), 0 0 40px 10px rgba(255,255,255,0.2)' : 'none',
+                  outline: activeIndex === i ? '2px solid rgba(255,255,255,0.2)' : 'none',
+                  outlineOffset: activeIndex === i ? '3px' : '0px',
+                  transform: activeIndex === i ? 'scale(1.4)' : 'scale(1)',
+                }}
+              />
+            );
+          })}
+        </div>
+
         {/* Text Blocks */}
         {TEXT_BLOCKS.map((block, index) => {
           const { opacity, translateYvh } = getTextStyle(block, scrollProgress);
@@ -303,12 +354,13 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 <span
                   style={{
                     display: 'inline-block',
-                    fontSize: '11px',
-                    letterSpacing: '0.3em',
+                    fontSize: '12px',
+                    letterSpacing: '0.2em',
                     color: '#4ade80',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     marginBottom: '10px',
                     textTransform: 'uppercase',
+                    fontFamily: '\'Space Grotesk\', sans-serif',
                   }}
                 >
                   {block.label}
@@ -317,11 +369,11 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 {/* Heading */}
                 <h2
                   style={{
-                    fontFamily: 'Georgia, serif',
-                    fontSize: isActOne ? '64px' : '54px',
-                    fontWeight: 700,
+                    fontFamily: '\'Manrope\', sans-serif',
+                    fontSize: 'clamp(48px, 6vw, 90px)',
+                    fontWeight: 800,
                     color: 'white',
-                    lineHeight: 1.08,
+                    lineHeight: 0.95,
                     marginBottom: '14px',
                     letterSpacing: '-0.02em',
                     textShadow: '0 2px 20px rgba(0,0,0,0.4)',
@@ -334,8 +386,8 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 {/* Subtext */}
                 <p
                   style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: '15px',
+                    fontFamily: '\'Inter\', sans-serif',
+                    fontSize: '17px',
                     fontWeight: 400,
                     color: 'rgba(255,255,255,0.8)',
                     lineHeight: 1.6,
@@ -350,8 +402,9 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 {/* Extra line */}
                 <p
                   style={{
-                    fontFamily: 'Georgia, serif',
+                    fontFamily: '\'Inter\', sans-serif',
                     fontSize: '13px',
+                    fontWeight: 500,
                     color: 'rgba(255,255,255,0.5)',
                     fontStyle: 'italic',
                     marginTop: '8px',
