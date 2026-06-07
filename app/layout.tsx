@@ -1,48 +1,28 @@
-import { Analytics } from '@vercel/analytics/next'
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
-
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
+import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
+import HollandAIButton from "@/components/holland-ai-button";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Holland Dairy - Premium Dutch Dairy Products',
-  description: 'Discover premium Dutch dairy products including Greek yogurt, artisan cheese, and fresh milk from Holland Dairy. Tradition meets quality since 1985.',
-  generator: 'v0.app',
+  title: "Holland Dairy – Dairy Processing Company",
+  description: "Holland Dairy is a leading dairy company in Ethiopia. Ethiopian by nationality, Dutch by technology.",
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: "/favicon.png",
   },
-}
+};
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} bg-white`}>
-      <body className="font-sans antialiased">
+    <html lang="en">
+      <body>
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Analytics />
+        <HollandAIButton />
       </body>
     </html>
-  )
+  );
 }
