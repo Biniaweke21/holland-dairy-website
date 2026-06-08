@@ -334,21 +334,68 @@ export default function ScrollVideoHero({ onScrollProgress, onHeroComplete }: Sc
             }}
           >
             <style>{`
-              @keyframes fadeInLogo { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0px); } }
-              @keyframes breathe { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
-              @keyframes float { 0%, 100% { transform: translateY(0px); opacity: 0.3; } 50% { transform: translateY(-20px); opacity: 0.7; } }
+              @keyframes cowFloat {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-18px); }
+              }
+              @keyframes ringPulse1 {
+                0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.7; }
+                100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+              }
+              @keyframes ringPulse2 {
+                0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.6; }
+                100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+              }
+              @keyframes ringPulse3 {
+                0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.5; }
+                100% { transform: translate(-50%, -50%) scale(3.4); opacity: 0; }
+              }
+              @keyframes ringPulse4 {
+                0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.4; }
+                100% { transform: translate(-50%, -50%) scale(4.0); opacity: 0; }
+              }
+              @keyframes loadingFill {
+                from { width: 0%; }
+                to { width: 100%; }
+              }
+              @keyframes breathe {
+                0%, 100% { opacity: 0.4; }
+                50% { opacity: 1; }
+              }
+              @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(16px); }
+                to { opacity: 1; transform: translateY(0px); }
+              }
             `}</style>
             <img src="/frames/ezgif-frame-001.jpg" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(20px)', transform: 'scale(1.1)' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }} />
-            {[['35%','20%','0s'],['60%','15%','0.5s'],['40%','80%','1s'],['65%','85%','1.5s'],['25%','50%','0.3s'],['70%','45%','2s']].map(([top, left, delay], i) => (
-              <div key={i} style={{ position: 'absolute', top, left, width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: `float ${2.5 + i * 0.3}s ease-in-out infinite`, animationDelay: delay }} />
-            ))}
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
-              <img src="/cow.png" alt="Cow" style={{ height: '56px', objectFit: 'contain', animation: 'fadeInLogo 0.8s ease' }} />
-              <div style={{ width: '200px', height: '3px', borderRadius: '999px', background: 'rgba(255,255,255,0.15)', overflow: 'hidden', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'linear-gradient(to right, #2D7A3A, #4ade80, #2D7A3A)', backgroundSize: '200%', width: `${Math.round((loadedCount / FRAME_COUNT) * 100)}%`, transition: 'width 0.1s ease' }} />
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+              {/* Cow container with energy rings */}
+              <div style={{ position: 'relative', width: '160px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', width: '100px', height: '100px', borderRadius: '50%', border: '1.5px solid rgba(45,122,58,0.6)', pointerEvents: 'none', animation: 'ringPulse1 2s ease-out infinite', animationDelay: '0s' }} />
+                <div style={{ position: 'absolute', top: '50%', left: '50%', width: '100px', height: '100px', borderRadius: '50%', border: '1.5px solid rgba(45,122,58,0.6)', pointerEvents: 'none', animation: 'ringPulse2 2s ease-out infinite', animationDelay: '0.5s' }} />
+                <div style={{ position: 'absolute', top: '50%', left: '50%', width: '100px', height: '100px', borderRadius: '50%', border: '1.5px solid rgba(45,122,58,0.6)', pointerEvents: 'none', animation: 'ringPulse3 2s ease-out infinite', animationDelay: '1s' }} />
+                <div style={{ position: 'absolute', top: '50%', left: '50%', width: '100px', height: '100px', borderRadius: '50%', border: '1.5px solid rgba(45,122,58,0.6)', pointerEvents: 'none', animation: 'ringPulse4 2s ease-out infinite', animationDelay: '1.5s' }} />
+                <img
+                  src="/cow.png"
+                  alt="Cow"
+                  style={{
+                    width: '110px',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    position: 'relative',
+                    zIndex: 2,
+                    filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.4)) drop-shadow(0 0 20px rgba(45,122,58,0.3))',
+                    animation: 'cowFloat 2.8s ease-in-out infinite',
+                  }}
+                />
               </div>
-              <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '12px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', animation: 'breathe 1.5s ease-in-out infinite' }}>
+              {/* Loading bar */}
+              <div style={{ width: '180px', height: '3px', borderRadius: '999px', background: 'rgba(255,255,255,0.12)', overflow: 'hidden', animation: 'fadeInUp 0.6s ease 0.3s both' }}>
+                <div style={{ height: '100%', background: 'linear-gradient(to right, #2D7A3A, #4ade80)', borderRadius: '999px', animation: 'loadingFill 2.5s ease-in-out forwards' }} />
+              </div>
+              {/* Loading text */}
+              <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', animation: 'breathe 1.5s ease-in-out infinite, fadeInUp 0.6s ease 0.5s both' }}>
                 Loading your flavour experience...
               </div>
             </div>
