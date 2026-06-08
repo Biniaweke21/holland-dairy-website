@@ -21,10 +21,10 @@ const FRAME_COUNT = 152;
 const TOTAL_ZONES = 3;
 
 const ACTS = [
-  { start: 1, end: 57 },    // Act 1: Natural yogurt
-  { start: 58, end: 114 },  // Act 2: Mango
-  { start: 115, end: 171 }, // Act 3: Strawberry
-  { start: 172, end: 228 }, // Act 4: Banana
+  { start: 1, end: 57 },
+  { start: 58, end: 114 },
+  { start: 115, end: 171 },
+  { start: 172, end: 228 },
 ];
 
 const TEXT_BLOCKS: TextBlock[] = [
@@ -89,12 +89,12 @@ function getTextStyle(block: TextBlock, scrollProgress: number): { opacity: numb
 
   if (travelProgress < 0.2) {
     const enterProgress = travelProgress / 0.2;
-    translateYvh = 100 - (enterProgress * 100);
+    translateYvh = 100 - (1 - Math.pow(1 - enterProgress, 3)) * 100;
   } else if (travelProgress <= 0.8) {
     translateYvh = 0;
   } else {
     const exitProgress = (travelProgress - 0.8) / 0.2;
-    translateYvh = -(exitProgress * 100);
+    translateYvh = -(Math.pow(exitProgress, 3) * 100);
   }
 
   return { opacity: 1, translateYvh };
@@ -105,66 +105,112 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const images = useRef<HTMLImageElement[]>([]);
   const lastDrawnFrame = useRef<number>(-1);
+  const rafId = useRef<number | null>(null);
+  const textBlockRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const outerBlockRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [loadedCount, setLoadedCount] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [loadingVisible, setLoadingVisible] = useState(true);
   const [loadingMounted, setLoadingMounted] = useState(true);
-  const [, forceUpdate] = useState({});
+  const [firstBatchReady, setFirstBatchReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Preload all images
   useEffect(() => {
     let loadCount = 0;
+    let firstBatchCount = 0;
 
     for (let i = 1; i <= FRAME_COUNT; i++) {
       const img = new Image();
       img.src = getFramePath(i);
-      img.onload = () => {
+      (img as any).fetchPriority = i <= 10 ? 'high' : 'low';
+      images.current[i - 1] = img;
+      img.decode().then(() => {
         loadCount++;
         setLoadedCount(loadCount);
-        if (loadCount === FRAME_COUNT) {
-          setIsReady(true);
+        if (loadCount === FRAME_COUNT) setIsReady(true);
+        if (i <= 10) {
+          firstBatchCount++;
+          if (firstBatchCount === 10) setFirstBatchReady(true);
         }
-      };
-      images.current[i - 1] = img;
+      }).catch(() => {
+        loadCount++;
+        setLoadedCount(loadCount);
+        if (loadCount === FRAME_COUNT) setIsReady(true);
+      });
     }
   }, []);
+
+  // Draw first frame as soon as first batch is ready
+  useEffect(() => {
+    if (firstBatchReady) {
+      drawFrame(1);
+    }
+  }, [firstBatchReady]);
+
+  // Lock scroll during loading
+  useEffect(() => {
+    if (loadingMounted) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      window.scrollTo(0, 0);
+    }
+  }, [loadingMounted]);
 
   // Handle loading screen dismissal
   useEffect(() => {
     if (isReady) {
-      setTimeout(() => {
-        setLoadingVisible(false);
-      }, 400);
-      setTimeout(() => {
-        setLoadingMounted(false);
-      }, 1000);
+      setTimeout(() => { setLoadingVisible(false); }, 400);
+      setTimeout(() => { setLoadingMounted(false); }, 1000);
     }
   }, [isReady]);
+
+  // Resize canvas function
+  const resizeCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+  };
 
   // Draw frame function
   const drawFrame = (index: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Early return if already drawn
     if (index === lastDrawnFrame.current) return;
     lastDrawnFrame.current = index;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const frameIndex = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(index) - 1));
     const img = images.current[frameIndex];
     if (!img || !img.complete) return;
 
-    const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
-    const x = (canvas.width - img.naturalWidth * scale) / 2;
-    const y = (canvas.height - img.naturalHeight * scale) / 2;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    const x = (w - img.naturalWidth * scale) / 2;
+    const y = (h - img.naturalHeight * scale) / 2;
 
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, x, y, img.naturalWidth * scale, img.naturalHeight * scale);
   };
 
@@ -177,21 +223,25 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
     const wrapperHeight = wrapperRef.current.offsetHeight;
     const vh = window.innerHeight;
 
-    // Overall progress for navbar
     const overallProgress = Math.max(0, Math.min(1, (scrollY - wrapperTop) / (wrapperHeight - vh)));
-    
+
     setScrollProgress(overallProgress);
-    
+
     if (onScrollProgress) {
       onScrollProgress(overallProgress);
     }
 
-    // Get frame index based on progress
     const frameIndex = getFrameIndex(overallProgress);
-
-    // Draw frame immediately
     drawFrame(frameIndex);
-    forceUpdate({});
+
+    TEXT_BLOCKS.forEach((block, i) => {
+      const inner = textBlockRefs.current[i];
+      const outer = outerBlockRefs.current[i];
+      if (!inner || !outer) return;
+      const { opacity, translateYvh } = getTextStyle(block, overallProgress);
+      outer.style.opacity = String(opacity);
+      inner.style.transform = `translateY(${translateYvh}vh)`;
+    });
   };
 
   // Scroll event listener
@@ -199,31 +249,34 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
     if (!isReady) return;
 
     const handleScroll = () => {
-      updateFrame();
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(updateFrame);
     };
 
     const handleResize = () => {
+      resizeCanvas();
       updateFrame();
     };
 
-    // Initial calculation
+    resizeCanvas();
     updateFrame();
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll, { passive: true } as any);
       window.removeEventListener('resize', handleResize);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
   }, [isReady, onScrollProgress]);
 
   return (
-    <div 
-      ref={wrapperRef} 
-      style={{ 
-        position: 'relative', 
-        height: '950vh',
+    <div
+      ref={wrapperRef}
+      style={{
+        position: 'relative',
+        height: '700vh',
         zIndex: 1,
       }}
     >
@@ -266,24 +319,16 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 from { opacity: 0; transform: translateY(-10px); }
                 to { opacity: 1; transform: translateY(0px); }
               }
-
-              @keyframes loadingFill {
-                from { width: 0%; background-position: 0%; }
-                to { width: 100%; background-position: 200%; }
-              }
-
               @keyframes breathe {
                 0%, 100% { opacity: 0.4; }
                 50% { opacity: 1; }
               }
-
               @keyframes float {
                 0%, 100% { transform: translateY(0px); opacity: 0.3; }
                 50% { transform: translateY(-20px); opacity: 0.7; }
               }
             `}</style>
 
-            {/* Blurred first frame background */}
             <img
               src="/frames/ezgif-frame-001.jpg"
               alt=""
@@ -297,97 +342,12 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 transform: 'scale(1.1)',
               }}
             />
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }} />
 
-            {/* Dark overlay */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0,0,0,0.45)',
-              }}
-            />
+            {[['35%','20%','0s'],['60%','15%','0.5s'],['40%','80%','1s'],['65%','85%','1.5s'],['25%','50%','0.3s'],['70%','45%','2s']].map(([top, left, delay], i) => (
+              <div key={i} style={{ position: 'absolute', top, left, width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: `float ${2.5 + i * 0.3}s ease-in-out infinite`, animationDelay: delay }} />
+            ))}
 
-            {/* Floating particles */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '35%',
-                left: '20%',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.3)',
-                animation: 'float 3s ease-in-out infinite',
-                animationDelay: '0s',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                top: '60%',
-                left: '15%',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.3)',
-                animation: 'float 2.5s ease-in-out infinite',
-                animationDelay: '0.5s',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                top: '40%',
-                left: '80%',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.3)',
-                animation: 'float 3.5s ease-in-out infinite',
-                animationDelay: '1s',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                top: '65%',
-                left: '85%',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.3)',
-                animation: 'float 2.8s ease-in-out infinite',
-                animationDelay: '1.5s',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                top: '25%',
-                left: '50%',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.3)',
-                animation: 'float 4s ease-in-out infinite',
-                animationDelay: '0.3s',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                top: '70%',
-                left: '45%',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.3)',
-                animation: 'float 3.2s ease-in-out infinite',
-                animationDelay: '2s',
-              }}
-            />
-
-            {/* Centered content */}
             <div
               style={{
                 position: 'absolute',
@@ -399,18 +359,11 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                 gap: '32px',
               }}
             >
-              {/* Cow Image */}
               <img
                 src="/cow.png"
                 alt="Cow"
-                style={{
-                  height: '56px',
-                  objectFit: 'contain',
-                  animation: 'fadeInLogo 0.8s ease',
-                }}
+                style={{ height: '56px', objectFit: 'contain', animation: 'fadeInLogo 0.8s ease' }}
               />
-
-              {/* Loading bar */}
               <div
                 style={{
                   width: '200px',
@@ -429,15 +382,14 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                     height: '100%',
                     background: 'linear-gradient(to right, #2D7A3A, #4ade80, #2D7A3A)',
                     backgroundSize: '200%',
-                    animation: 'loadingFill 2.5s ease-in-out forwards',
+                    width: `${Math.round((loadedCount / FRAME_COUNT) * 100)}%`,
+                    transition: 'width 0.1s ease',
                   }}
                 />
               </div>
-
-              {/* Loading text */}
               <div
                 style={{
-                  fontFamily: '\'Space Grotesk\', sans-serif',
+                  fontFamily: 'Nunito, sans-serif',
                   fontSize: '12px',
                   fontWeight: 600,
                   letterSpacing: '0.2em',
@@ -463,17 +415,13 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
           }}
         />
 
-        {/* Scroll Progress Indicator */}
-        {/* Vertical line connecting the circles */}
+        {/* Scroll Progress Indicator line */}
         <div
           style={{
             position: 'absolute',
-            left: '29px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: '1.5px',
-            height: '104px',
-            background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent)',
+            ...(isMobile
+              ? { bottom: '37px', left: '50%', transform: 'translateX(-50%)', width: '104px', height: '1.5px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent)' }
+              : { left: '29px', top: '50%', transform: 'translateY(-50%)', width: '1.5px', height: '104px', background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent)' }),
             zIndex: 9,
             pointerEvents: 'none',
           }}
@@ -482,12 +430,11 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
         <div
           style={{
             position: 'absolute',
-            left: '24px',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            ...(isMobile
+              ? { bottom: '32px', left: '50%', transform: 'translateX(-50%)', flexDirection: 'row' as const }
+              : { left: '24px', top: '50%', transform: 'translateY(-50%)', flexDirection: 'column' as const }),
             zIndex: 10,
             display: 'flex',
-            flexDirection: 'column',
             gap: '20px',
             pointerEvents: 'none',
           }}
@@ -516,32 +463,31 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
 
         {/* Text Blocks */}
         {TEXT_BLOCKS.map((block, index) => {
-          const { opacity, translateYvh } = getTextStyle(block, scrollProgress);
           const isLeft = block.side === 'left';
-          const isActOne = index === 0;
-
           return (
             <div
               key={index}
+              ref={(el) => { outerBlockRefs.current[index] = el; }}
               style={{
                 position: 'absolute',
-                ...(isLeft ? { left: '6%' } : { right: '6%' }),
+                ...(isLeft ? { left: isMobile ? '4%' : '6%' } : { right: isMobile ? '4%' : '6%' }),
                 top: 0,
                 height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 pointerEvents: 'none',
                 zIndex: 2,
-                opacity: opacity,
+                opacity: 0,
               }}
             >
               <div
+                ref={(el) => { textBlockRefs.current[index] = el; }}
                 style={{
-                  maxWidth: '360px',
-                  transform: `translateY(${translateYvh}vh)`,
+                  willChange: 'transform',
+                  maxWidth: isMobile ? 'min(280px, 80vw)' : '360px',
+                  transform: 'translateY(100vh)',
                 }}
               >
-                {/* Label */}
                 <span
                   style={{
                     display: 'inline-block',
@@ -551,17 +497,16 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                     fontWeight: 600,
                     marginBottom: '10px',
                     textTransform: 'uppercase',
-                    fontFamily: '\'Space Grotesk\', sans-serif',
+                    fontFamily: 'Nunito, sans-serif',
                   }}
                 >
                   {block.label}
                 </span>
 
-                {/* Heading */}
                 <h2
                   style={{
-                    fontFamily: '\'Manrope\', sans-serif',
-                    fontSize: 'clamp(48px, 6vw, 90px)',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontSize: isMobile ? 'clamp(32px, 8vw, 48px)' : 'clamp(48px, 6vw, 90px)',
                     fontWeight: 800,
                     color: 'white',
                     lineHeight: 0.95,
@@ -574,11 +519,10 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                   <span style={{ display: 'block' }}>{block.line2}</span>
                 </h2>
 
-                {/* Subtext */}
                 <p
                   style={{
-                    fontFamily: '\'Inter\', sans-serif',
-                    fontSize: '17px',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontSize: isMobile ? '14px' : '17px',
                     fontWeight: 400,
                     color: 'rgba(255,255,255,0.8)',
                     lineHeight: 1.6,
@@ -590,10 +534,9 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
                   {block.subtext}
                 </p>
 
-                {/* Extra line */}
                 <p
                   style={{
-                    fontFamily: '\'Inter\', sans-serif',
+                    fontFamily: 'Nunito, sans-serif',
                     fontSize: '13px',
                     fontWeight: 500,
                     color: 'rgba(255,255,255,0.5)',
@@ -609,7 +552,6 @@ export default function ScrollVideoHero({ onScrollProgress }: ScrollVideoHeroPro
         })}
       </div>
 
-      {/* Bottom sentinel */}
       <div style={{ height: 0, visibility: 'hidden' }} />
     </div>
   );

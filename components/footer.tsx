@@ -8,7 +8,7 @@ export default function Footer() {
       style={{
         backgroundColor: '#1a5c2a',
         color: 'white',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Nunito, sans-serif',
         padding: '80px 48px 40px 48px',
       }}
       className="footer-section"

@@ -16,7 +16,7 @@ export default function HollandAIButton() {
         padding: "14px 24px",
         fontSize: "14px",
         fontWeight: 600,
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "Nunito, sans-serif",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",

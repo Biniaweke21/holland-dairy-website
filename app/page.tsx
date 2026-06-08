@@ -23,11 +23,10 @@ export default function Home() {
           position: 'relative',
           zIndex: 10,
           marginTop: '-60vh',
-          paddingTop: '60vh',
+          paddingTop: '0',
           background: '#ffffff',
           borderRadius: '24px 24px 0 0',
           boxShadow: '0 -40px 80px rgba(0,0,0,0.4)',
-          overflow: 'hidden',
         }}
       >
         <AboutSection />

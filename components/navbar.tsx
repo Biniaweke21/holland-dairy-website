@@ -30,20 +30,38 @@ function getNavStyle(progress: number): { background: string; borderColor: strin
 
 export default function Navbar({ scrollProgress = 0 }: NavbarProps) {
   const [scrollY, setScrollY] = useState(0);
+  const [inWhiteSection, setInWhiteSection] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      const sy = window.scrollY;
+      setScrollY(sy);
+      const heroHeight = window.innerHeight * 6.4;
+      setInWhiteSection(sy > heroHeight);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const isAtTop = scrollY < 50;
-  const style = isAtTop
+  const heroStyle = isAtTop
     ? { background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.12)' }
     : getNavStyle(scrollProgress);
+
+  const whiteStyle = {
+    background: 'rgba(255,255,255,0.85)',
+    borderColor: 'rgba(0,0,0,0.08)',
+  };
+
+  const style = inWhiteSection ? whiteStyle : heroStyle;
+  const linkColor = inWhiteSection ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)';
+  const linkHoverColor = inWhiteSection ? '#0A0A0A' : 'white';
+  const ctaBorder = inWhiteSection ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)';
+  const ctaColor = inWhiteSection ? '#0A0A0A' : 'white';
+  const ctaHoverBg = inWhiteSection ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)';
+  const ctaHoverBorder = inWhiteSection ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.6)';
+  const shadowColor = inWhiteSection ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.15)';
 
   return (
     <div
@@ -71,12 +89,12 @@ export default function Navbar({ scrollProgress = 0 }: NavbarProps) {
           padding: '0 32px',
           borderRadius: '16px',
           transition: 'all 0.4s ease, background 0.6s ease, border-color 0.6s ease',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          boxShadow: `0 8px 32px ${shadowColor}`,
           border: '1px solid',
           borderColor: style.borderColor,
           backdropFilter: 'blur(20px)',
           background: style.background,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'Nunito, sans-serif',
         }}
       >
       {/* Left - Logo */}
@@ -99,73 +117,33 @@ export default function Navbar({ scrollProgress = 0 }: NavbarProps) {
       >
         <a
           href="#home"
-          style={{
-            fontSize: '14px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.75)',
-            textDecoration: 'none',
-            transition: 'color 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'white';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
-          }}
+          style={{ fontSize: '14px', fontWeight: 600, color: linkColor, textDecoration: 'none', transition: 'color 0.2s ease' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = linkHoverColor; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = linkColor; }}
         >
           Home
         </a>
         <a
           href="#products"
-          style={{
-            fontSize: '14px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.75)',
-            textDecoration: 'none',
-            transition: 'color 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'white';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
-          }}
+          style={{ fontSize: '14px', fontWeight: 600, color: linkColor, textDecoration: 'none', transition: 'color 0.2s ease' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = linkHoverColor; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = linkColor; }}
         >
           Our Products
         </a>
         <a
           href="#story"
-          style={{
-            fontSize: '14px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.75)',
-            textDecoration: 'none',
-            transition: 'color 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'white';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
-          }}
+          style={{ fontSize: '14px', fontWeight: 600, color: linkColor, textDecoration: 'none', transition: 'color 0.2s ease' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = linkHoverColor; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = linkColor; }}
         >
           Our Story
         </a>
         <a
           href="#career"
-          style={{
-            fontSize: '14px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.75)',
-            textDecoration: 'none',
-            transition: 'color 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'white';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
-          }}
+          style={{ fontSize: '14px', fontWeight: 600, color: linkColor, textDecoration: 'none', transition: 'color 0.2s ease' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = linkHoverColor; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = linkColor; }}
         >
           Career
         </a>
@@ -177,26 +155,9 @@ export default function Navbar({ scrollProgress = 0 }: NavbarProps) {
           href="https://holland-dairy.com/our-products/"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            display: 'inline-block',
-            background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.3)',
-            color: 'white',
-            fontSize: '13px',
-            fontWeight: 500,
-            padding: '8px 20px',
-            borderRadius: '999px',
-            textDecoration: 'none',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-          }}
+          style={{ display: 'inline-block', background: 'transparent', border: `1px solid ${ctaBorder}`, color: ctaColor, fontSize: '13px', fontWeight: 500, padding: '8px 20px', borderRadius: '999px', textDecoration: 'none', transition: 'all 0.2s ease' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = ctaHoverBg; e.currentTarget.style.borderColor = ctaHoverBorder; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = ctaBorder; }}
         >
           Our Products
         </a>

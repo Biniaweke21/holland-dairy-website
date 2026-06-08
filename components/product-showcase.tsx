@@ -71,7 +71,7 @@ export default function ProductShowcase() {
       style={{
         backgroundColor: '#f5f5f5',
         padding: '120px 48px',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Nunito, sans-serif',
       }}
       className="product-showcase-section"
     >
