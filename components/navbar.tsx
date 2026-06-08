@@ -36,7 +36,7 @@ export default function Navbar({ scrollProgress = 0 }: NavbarProps) {
     const handleScroll = () => {
       const sy = window.scrollY;
       setScrollY(sy);
-      const heroHeight = window.innerHeight * 6.4;
+      const heroHeight = window.innerHeight;
       setInWhiteSection(sy > heroHeight);
     };
 
@@ -50,17 +50,17 @@ export default function Navbar({ scrollProgress = 0 }: NavbarProps) {
     : getNavStyle(scrollProgress);
 
   const whiteStyle = {
-    background: 'rgba(255,255,255,0.85)',
-    borderColor: 'rgba(0,0,0,0.08)',
+    background: 'rgba(255,255,255,0.95)',
+    borderColor: 'rgba(0,0,0,0.1)',
   };
 
   const style = inWhiteSection ? whiteStyle : heroStyle;
-  const linkColor = inWhiteSection ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)';
-  const linkHoverColor = inWhiteSection ? '#0A0A0A' : 'white';
-  const ctaBorder = inWhiteSection ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)';
+  const linkColor = inWhiteSection ? '#0A0A0A' : 'rgba(255,255,255,0.75)';
+  const linkHoverColor = inWhiteSection ? '#2D7A3A' : 'white';
+  const ctaBorder = inWhiteSection ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)';
   const ctaColor = inWhiteSection ? '#0A0A0A' : 'white';
   const ctaHoverBg = inWhiteSection ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)';
-  const ctaHoverBorder = inWhiteSection ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.6)';
+  const ctaHoverBorder = inWhiteSection ? '#2D7A3A' : 'rgba(255,255,255,0.6)';
   const shadowColor = inWhiteSection ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.15)';
 
   return (

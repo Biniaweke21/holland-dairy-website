@@ -176,15 +176,26 @@ function StorySection() {
   return (
     <div ref={sectionRef} style={{ display: 'flex', position: 'relative', backgroundColor: '#ffffff' }}>
       {/* LEFT — sticky image */}
-      <div style={{ width: '50%', position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', flexShrink: 0 }}>
-        {STORY_STEPS.map((step, i) => (
-          <img
-            key={i}
-            src={step.image}
-            alt={step.label}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: activeStep === i ? 1 : 0, transition: 'opacity 0.8s cubic-bezier(0.16,1,0.3,1)' }}
-          />
-        ))}
+      <div style={{ width: '50%', position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 24px 32px 40px', backgroundColor: '#f8f8f8' }}>
+        <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '20px', overflow: 'hidden' }}>
+          {STORY_STEPS.map((step, i) => (
+            <img
+              key={i}
+              src={step.image}
+              alt={step.label}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                opacity: activeStep === i ? 1 : 0,
+                transform: activeStep === i ? 'scale(1.04)' : 'scale(1.08)',
+                transition: 'opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 1.2s cubic-bezier(0.16,1,0.3,1)',
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       {/* RIGHT — scrolling steps */}

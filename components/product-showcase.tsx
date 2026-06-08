@@ -159,16 +159,14 @@ export default function ProductShowcase() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              overflow: 'hidden',
             }}
           >
-            <div
-              style={{
-                color: '#2D7A3A',
-                fontSize: '14px',
-              }}
-            >
-              Natural Yoghurt
-            </div>
+            <img
+              src="/natural.jpg"
+              alt="Natural Yoghurt"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
           </div>
 
           {/* Card Body */}
@@ -235,16 +233,14 @@ export default function ProductShowcase() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              overflow: 'hidden',
             }}
           >
-            <div
-              style={{
-                color: '#2D7A3A',
-                fontSize: '14px',
-              }}
-            >
-              Fruit Yoghurt
-            </div>
+            <img
+              src="/fruit.jpg"
+              alt="Fruit Yoghurt"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
           </div>
 
           {/* Card Body */}
