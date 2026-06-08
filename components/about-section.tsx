@@ -261,28 +261,16 @@ function StorySection() {
 }
 
 export default function AboutSection() {
-  const [sectionAVisible, setSectionAVisible] = useState(false);
-  const [sectionBVisible, setSectionBVisible] = useState(false);
   const [bsVisible, setBsVisible] = useState(false);
   const [visibleWords, setVisibleWords] = useState<boolean[]>([]);
   const [paraVisible, setParaVisible] = useState(false);
 
-  const sectionARef = useRef<HTMLDivElement>(null);
-  const sectionBRef = useRef<HTMLDivElement>(null);
   const bsRef = useRef<HTMLDivElement>(null);
 
   const words = HEADLINE.split(' ');
 
   useEffect(() => {
     const observerOptions = { threshold: 0.2, rootMargin: '0px' };
-
-    const sectionAObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => { if (entry.isIntersecting) setSectionAVisible(true); });
-    }, observerOptions);
-
-    const sectionBObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => { if (entry.isIntersecting) setSectionBVisible(true); });
-    }, observerOptions);
 
     const bsObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -298,13 +286,9 @@ export default function AboutSection() {
       });
     }, { threshold: 0.15 });
 
-    if (sectionARef.current) sectionAObserver.observe(sectionARef.current);
-    if (sectionBRef.current) sectionBObserver.observe(sectionBRef.current);
     if (bsRef.current) bsObserver.observe(bsRef.current);
 
     return () => {
-      if (sectionARef.current) sectionAObserver.unobserve(sectionARef.current);
-      if (sectionBRef.current) sectionBObserver.unobserve(sectionBRef.current);
       if (bsRef.current) bsObserver.unobserve(bsRef.current);
     };
   }, []);
@@ -380,72 +364,6 @@ export default function AboutSection() {
       {/* STORY SECTION */}
       <StorySection />
 
-      <div
-        ref={sectionARef}
-        style={{ padding: '140px 48px 120px', maxWidth: '1100px', margin: '0 auto', opacity: sectionAVisible ? 1 : 0, transform: sectionAVisible ? 'translateY(0)' : 'translateY(40px)', transition: 'opacity 1s ease, transform 1s ease' }}
-      >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '48px' }}>
-          <div style={{ width: '32px', height: '2px', backgroundColor: '#2D7A3A' }} />
-          <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: '11px', letterSpacing: '0.25em', color: '#2D7A3A', fontWeight: 600, textTransform: 'uppercase' }}>
-            Ethiopian by nationality, Dutch by technology
-          </span>
-        </div>
-
-        <h2
-          className="about-heading"
-          style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, color: '#0A0A0A', lineHeight: 1.05, letterSpacing: '-0.03em', marginBottom: '48px' }}
-        >
-          Building a brighter
-          <br />
-          <span style={{ color: '#2D7A3A' }}>tomorrow</span> through
-          <br />
-          dairy products.
-        </h2>
-
-        <div
-          className="about-body-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', borderTop: '1px solid #e5e5e5', paddingTop: '48px' }}
-        >
-          <p style={{ fontFamily: 'Nunito, sans-serif', fontSize: '17px', color: '#333333', lineHeight: 1.85 }}>
-            Holland Dairy is a leading dairy company in Ethiopia. Our purpose is to provide a healthy and positive future for Ethiopians and their families.
-          </p>
-          <p style={{ fontFamily: 'Nunito, sans-serif', fontSize: '17px', color: '#555555', lineHeight: 1.85 }}>
-            We believe that high-quality, fresh dairy sourced from local farms should be accessible to all Ethiopians — not just a privileged few.
-          </p>
-        </div>
-      </div>
-
-      {/* DIVIDER */}
-      <div style={{ width: '100%', height: '1px', backgroundColor: '#e5e5e5' }} />
-
-      {/* SECTION B */}
-      <div ref={sectionBRef} style={{ padding: '80px 48px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '64px' }} className="about-columns">
-          <div style={{ borderLeft: '3px solid #2D7A3A', paddingLeft: '24px', opacity: sectionBVisible ? 1 : 0, transform: sectionBVisible ? 'translateY(0)' : 'translateY(30px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
-            <h3 style={{ fontFamily: 'Nunito, sans-serif', fontSize: '28px', fontWeight: 700, color: '#1a1a1a', marginBottom: '16px' }}>Premium Quality</h3>
-            <p style={{ fontFamily: 'Nunito, sans-serif', fontSize: '16px', color: '#555555', lineHeight: 1.8 }}>
-              You and your family deserve the highest quality dairy products to support a happy and healthy life. At Holland Dairy, we're committed to quality throughout all steps of our supply chain from the raw milk we buy from local farmers and the manufacturing process to the packaging and the distribution. We ensure full compliance and sustainability before sourcing milk from any Ethiopian dairy farm, as well as conduct continued quality checks to ensure our premium quality. As a result, Holland Dairy is known to be the leading quality dairy brand in Ethiopia.
-            </p>
-          </div>
-          <div style={{ borderLeft: '3px solid #2D7A3A', paddingLeft: '24px', opacity: sectionBVisible ? 1 : 0, transform: sectionBVisible ? 'translateY(0)' : 'translateY(30px)', transition: 'opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s' }}>
-            <h3 style={{ fontFamily: 'Nunito, sans-serif', fontSize: '28px', fontWeight: 700, color: '#1a1a1a', marginBottom: '16px' }}>Locally Sourced</h3>
-            <p style={{ fontFamily: 'Nunito, sans-serif', fontSize: '16px', color: '#555555', lineHeight: 1.8 }}>
-              Ethiopian dairy farming plays an important role in the economy of many rural communities. To support Ethiopia and Ethiopians, we are dedicated to only sourcing our raw milk from local farms. More importantly, we're focusing on smaller farms to help these local communities thrive.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .about-heading { font-size: 40px !important; }
-          .about-body-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
-          .about-columns { grid-template-columns: 1fr !important; gap: 48px !important; }
-          #brand-statement { padding: 80px 24px 60px !important; }
-          div[style*="padding: 140px 48px"] { padding: 80px 24px 60px !important; }
-          div[style*="padding: 80px 48px"] { padding: 60px 24px !important; }
-        }
-      `}</style>
     </section>
   );
 }
