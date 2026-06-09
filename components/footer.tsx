@@ -306,7 +306,7 @@ export default function Footer() {
               color: 'rgba(255,255,255,0.5)',
             }}
           >
-            © 2021 Holland Dairy. All Rights Reserved.
+            © {new Date().getFullYear()} Holland Dairy. All Rights Reserved.
           </p>
 
           {/* Legal Links */}
