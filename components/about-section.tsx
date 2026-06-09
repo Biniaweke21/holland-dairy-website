@@ -316,7 +316,7 @@ export default function AboutSection() {
               fontFamily: 'Nunito, sans-serif',
               fontWeight: 800,
               fontSize: 'clamp(2.5rem, 5vw, 5rem)',
-              color: '#0A0A0A',
+              color: '#2D7A3A',
               lineHeight: 1.1,
               letterSpacing: '-0.03em',
               marginBottom: '40px',

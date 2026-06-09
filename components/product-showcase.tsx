@@ -98,7 +98,7 @@ export default function ProductShowcase() {
             marginBottom: '16px',
           }}
         >
-          From our farms to your table.
+          <span style={{ color: '#2D7A3A' }}>From our farms to your table.</span>
         </h2>
         <p
           style={{
