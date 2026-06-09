@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import StorySectionMobile from './story-section-mobile';
 
 const HEADLINE = 'Building a brighter tomorrow through dairy products.';
 
@@ -362,7 +363,10 @@ export default function AboutSection() {
       <div style={{ width: '100%', height: '1px', backgroundColor: '#e5e5e5' }} />
 
       {/* STORY SECTION */}
-      <StorySection />
+      <div className="hidden md:block">
+        <StorySection />
+      </div>
+      <StorySectionMobile />
 
     </section>
   );
