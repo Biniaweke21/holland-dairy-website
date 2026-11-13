@@ -94,6 +94,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ response: text });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Something went wrong' }, { status: 500 });
+    // Log the provider error for us; never show raw API errors (URLs, model names) to visitors.
+    console.error('holland-ai:', error?.message);
+    return NextResponse.json(
+      { error: "Sorry, I'm a little busy right now. Please try again in a moment." },
+      { status: 500 },
+    );
   }
 }

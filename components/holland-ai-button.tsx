@@ -8,6 +8,15 @@ interface Message {
   content: string;
 }
 
+// The model answers in light markdown: render **bold** and "* " bullets instead of showing raw symbols.
+function renderMarkdown(text: string) {
+  return text.replace(/^\s*[*-]\s+/gm, '• ').split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={i} style={{ color: '#ffffff', fontWeight: 700 }}>{part.slice(2, -2)}</strong>
+      : part,
+  );
+}
+
 const SUGGESTIONS = [
   'What flavours do you have? 🍓',
   'Recommend something healthy 💪',
@@ -218,7 +227,7 @@ export default function HollandAIButton() {
                 whiteSpace: 'pre-wrap',
               }}
             >
-              {msg.content}
+              {msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
             </div>
           ))}
 
